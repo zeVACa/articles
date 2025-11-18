@@ -1,0 +1,81 @@
+Request:
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
+
+Response (201):
+{
+  "id": "uuid",
+  "username": "john_doe",
+  "email": "john@example.com",
+  "created_at": "2025-11-13T10:00:00Z"
+}
+
+___________________________________________________________________
+
+Request:
+{
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
+
+Response (200):
+{
+  "access_token": "eyJhbGc...",
+  "refresh_token": "eyJhbGc...",
+  "expires_in": 900  // 15 минут в секундах
+}
+
+___________________________________________________________________
+
+Request:
+{
+  "refresh_token": "eyJhbGc..."
+}
+
+Response (200):
+{
+  "access_token": "eyJhbGc...",
+  "expires_in": 900
+}
+
+___________________________________________________________________
+
+Headers:
+Authorization: Bearer {access_token}
+
+Request:
+{
+  "refresh_token": "eyJhbGc..."  // опционально
+}
+
+Response (200):
+{
+  "message": "logged out successfully"
+}
+
+___________________________________________________________________
+
+Headers:
+Authorization: Bearer {access_token}
+
+Response (200):
+{
+  "id": "uuid",
+  "username": "john_doe",
+  "email": "john@example.com",
+  "created_at": "2025-11-13T10:00:00Z"
+}
+
+___________________________________________________________________
+
+{
+  "sub": "user-uuid",           // Subject (user ID)
+  "email": "john@example.com",
+  "username": "john_doe",
+  "exp": 1699876800,            // Expiration time
+  "iat": 1699876000,            // Issued at
+  "type": "access"              // или "refresh"
+}
