@@ -1,45 +1,49 @@
 package main
 
 import (
+	"articles/internal/config"
 	"articles/internal/router"
 	"articles/storage"
-	"net/http"
+	"fmt"
+	"log/slog"
+	"os"
+)
+
+const (
+	envLocal = "local"
+	envDev   = "dev"
+	envProd  = "prod"
 )
 
 func main() {
+	// TODO config
+	// TODO logger
+	// TODO init storage
+	// TODO init router
+	// TODO run server
+	cfg := config.MustLoad()
+	fmt.Println(cfg)
 
-	router.ImplementRouter()
+	log := setupLogger(cfg.Env)
+
+	log.Info("App started", slog.String("env", cfg.Env))
+	log.Debug("debug messages are enabled")
+
 	storage.InitDatabase()
-
-	http.ListenAndServe("localhost:8080", nil)
+	router.ImplementRouter()
 }
 
-//package main
-//
-//import (
-//"context"
-//"fmt"
-//"github.com/jackc/pgx/v5"
-//"os"
-//)
-//
-//func main() {
-//	conn, err := pgx.Connect(context.Background(), "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
-//	if err != nil {
-//		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-//		os.Exit(1)
-//	}
-//	defer conn.Close(context.Background())
-//
-//	/*var email, username, passwordHash string
-//
-//	err = conn.QueryRow(context.Background(),
-//		"SELECT email, username, password_hash FROM users WHERE id=$1", 1).
-//		Scan(&email, &username, &passwordHash)
-//	if err != nil {
-//		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-//		os.Exit(1)
-//	}
-//
-//	fmt.Printf("Email: %s, Username: %s, Password Hash: %s\n", email, username, passwordHash)*/
-//}
+func setupLogger(env string) *slog.Logger {
+	var logger *slog.Logger // ✅ Указатель!
+
+	switch env {
+	case envLocal:
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	case envDev:
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	case envProd:
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	}
+
+	return logger
+}

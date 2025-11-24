@@ -22,25 +22,20 @@ func NewAuthRepository(pool *pgxpool.Pool) *AuthRepositoryDI {
 }
 
 type AuthRepository interface {
-	RegisterUser() (models.User, error)
+	RegisterUser(email, username, passwordHash string) (models.User, error)
 }
 
-func (r *AuthRepositoryDI) RegisterUser() {
-	var email, username, passwordHash string
+func (r *AuthRepositoryDI) RegisterUser(email, username, passwordHash string) (models.User, error) {
+	var u models.User
 
 	err := r.pool.QueryRow(context.Background(),
-		"SELECT email, username, password_hash FROM users WHERE id=$1", 1).
-		Scan(&email, &username, &passwordHash)
+		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING (id, email, username, password_hash, email_verified, created_at, updated_at)", email, username, passwordHash).
+		Scan(&u.ID, &u.Email, &u.Username, &u.PasswordHash, &u.EmailVerified, u.CreatedAt, u.UpdatedAt)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)
 	}
 
-	//err = conn.QueryRow(context.Background(),
-	//		"SELECT email, username, password_hash FROM users WHERE id=$1", 1).
-	//		Scan(&email, &username, &passwordHash)
-	//	if err != nil {
-	//		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-	//		os.Exit(1)
-	//	}
+	return u, nil
 }

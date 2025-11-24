@@ -1,38 +1,36 @@
 package router
 
 import (
+	"articles/internal/config"
+	"articles/internal/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"log"
 	"net/http"
 )
-
-func TestHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("hello2"))
-	if err != nil {
-
-	}
-}
-
-func TestHandler2(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("hello2"))
-	if err != nil {
-
-	}
-}
-
-func TestHandler3(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("hello2"))
-	if err != nil {
-
-	}
-}
 
 func ImplementRouter() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/hello", TestHandler)
-	r.Get("/hello", TestHandler2)
-	r.Get("/hello", TestHandler3)
+	// handlers.NewRegisterUserHandler() - вот так тоже ошибки
+
+	// если сделать вот тут "реализацию" хендлера, то опять лезут ошибки
+
+	r.Get("/hello", handlers.)// Вот тут не понимаю как импортировать хендлер и использовать в роере
+
+
+	cfg := config.MustLoad()
+	srv := http.Server{
+		Addr:         cfg.Address,
+		Handler:      r,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimout,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Println("failed to start server")
+	}
 }

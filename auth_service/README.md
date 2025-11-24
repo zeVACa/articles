@@ -16,3 +16,5 @@ auth-service/
 ├── go.sum
 ├── Dockerfile
 └── README.md
+
+router -> handler -> service -> repository.

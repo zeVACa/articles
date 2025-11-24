@@ -16,8 +16,12 @@ func NewAuthService(repo repository.AuthRepository) *AuthDI {
 	}
 }
 
-func (r *AuthDI) Register() (models.User, error) {
-	user, err := r.repo.RegisterUser()
+type Service interface {
+	Register(email, username, passwordHash string) (models.User, error)
+}
+
+func (r *AuthDI) Register(email, username, passwordHash string) (models.User, error) {
+	user, err := r.repo.RegisterUser(email, username, passwordHash)
 	if err != nil {
 		fmt.Println(err)
 	}
