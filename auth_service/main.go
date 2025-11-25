@@ -2,7 +2,9 @@ package main
 
 import (
 	"articles/internal/config"
+	"articles/internal/repository"
 	"articles/internal/router"
+	"articles/internal/service"
 	"articles/storage"
 	"fmt"
 	"log/slog"
@@ -29,12 +31,19 @@ func main() {
 	log.Info("App started", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
 
-	storage.InitDatabase()
-	router.ImplementRouter()
+	//var pool pgxpool.Pool
+	//r := repository.NewAuthRepository(&pool)
+	//srvs := service.NewAuthService(r)
+	//h := handlers.RegisterUserHandlerDI{}
+	db := storage.InitDatabase()
+	authService := service.NewAuthService(repository.NewAuthRepository(db))
+
+	router.ImplementRouter(authService)
+
 }
 
 func setupLogger(env string) *slog.Logger {
-	var logger *slog.Logger // ✅ Указатель!
+	var logger *slog.Logger
 
 	switch env {
 	case envLocal:

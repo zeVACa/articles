@@ -26,7 +26,7 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 
 	u, err := s.service.Register(req.Email, req.Username, req.Password)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("hello", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
