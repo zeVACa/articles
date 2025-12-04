@@ -22,7 +22,12 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 	var req RegisterUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		myjson.SendError(
+			w,
+			fmt.Sprintf("Invalid request body: %v", err),
+			"Ошибка создания пользователя. Email должен быть уникальным",
+			http.StatusBadRequest)
+		return
 	}
 
 	u, err := (*s.service).Register(req.Email, req.Username, req.Password)
@@ -32,12 +37,8 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 			fmt.Sprintf("Filed to create user: %s", err),
 			"Ошибка создания пользователя. Email должен быть уникальным",
 			http.StatusBadRequest)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(u)
-	if err != nil {
-		fmt.Println(err)
-	}
+	myjson.SendJSON(w, http.StatusCreated, u)
 }
