@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
-	"os"
 )
 
 //type AuthRepository interface {
@@ -22,10 +21,10 @@ func NewAuthRepository(conn *pgx.Conn) *AuthRepositoryDI {
 }
 
 type AuthRepository interface {
-	RegisterUser(email, username, passwordHash string) (models.User, error)
+	RegisterUser(email, username, passwordHash string) (*models.User, error)
 }
 
-func (r *AuthRepositoryDI) RegisterUser(email, username, passwordHash string) (models.User, error) {
+func (r *AuthRepositoryDI) RegisterUser(email, username, passwordHash string) (*models.User, error) {
 	var u models.User
 
 	err := r.conn.QueryRow(context.Background(),
@@ -33,9 +32,8 @@ func (r *AuthRepositoryDI) RegisterUser(email, username, passwordHash string) (m
 		Scan(&u.ID, &u.Email, &u.Username, &u.PasswordHash, &u.EmailVerified, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("QueryRow failed: %v\n", err)
 	}
 
-	return u, nil
+	return &u, nil
 }

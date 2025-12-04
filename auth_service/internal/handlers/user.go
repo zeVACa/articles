@@ -2,18 +2,19 @@ package handlers
 
 import (
 	"articles/internal/service"
+	"articles/pgk/myjson"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type RegisterUserHandlerDI struct {
-	service service.Service
+	service *service.Service
 }
 
 func NewRegisterUserHandler(service service.Service) *RegisterUserHandlerDI {
 	return &RegisterUserHandlerDI{
-		service: service,
+		service: &service,
 	}
 }
 
@@ -24,9 +25,13 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 	}
 
-	u, err := s.service.Register(req.Email, req.Username, req.Password)
+	u, err := (*s.service).Register(req.Email, req.Username, req.Password)
 	if err != nil {
-		fmt.Println("hello", err)
+		myjson.SendError(
+			w,
+			fmt.Sprintf("Filed to create user: %s", err),
+			"Ошибка создания пользователя. Email должен быть уникальным",
+			http.StatusBadRequest)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

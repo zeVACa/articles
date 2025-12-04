@@ -3,7 +3,6 @@ package service
 import (
 	"articles/internal/models"
 	"articles/internal/repository"
-	"fmt"
 )
 
 type AuthDI struct {
@@ -17,13 +16,13 @@ func NewAuthService(repo repository.AuthRepository) *AuthDI {
 }
 
 type Service interface {
-	Register(email, username, passwordHash string) (models.User, error)
+	Register(email, username, passwordHash string) (*models.User, error)
 }
 
-func (r *AuthDI) Register(email, username, passwordHash string) (models.User, error) {
+func (r *AuthDI) Register(email, username, passwordHash string) (*models.User, error) {
 	user, err := r.repo.RegisterUser(email, username, passwordHash)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return user, nil
