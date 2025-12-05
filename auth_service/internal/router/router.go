@@ -15,9 +15,10 @@ func ImplementRouter(s service.Service) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	handler := handlers.NewRegisterUserHandler(s)
+	handler := handlers.NewAuthHandler(s)
 
-	r.Post("/hello", handler.RegisterUser)
+	r.Post("/register", handler.RegisterUser)
+	r.Post("/login", handler.LoginUser)
 
 	cfg := config.MustLoad()
 	srv := http.Server{
