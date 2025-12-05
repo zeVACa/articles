@@ -7,4 +7,5 @@ type RegisterUserRequest struct {
 }
 
 type RegisterUserResponse struct {
+	Success bool `json:"success"`
 }

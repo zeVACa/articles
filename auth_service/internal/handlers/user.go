@@ -58,7 +58,7 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	u, err := (*s.service).Register(req.Email, req.Username, req.Password)
+	_, err = (*s.service).Register(req.Email, req.Username, req.Password)
 	if err != nil {
 		myjson.SendError(
 			w,
@@ -68,5 +68,9 @@ func (s *RegisterUserHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	myjson.SendJSON(w, http.StatusCreated, u)
+	res := RegisterUserResponse{
+		Success: true,
+	}
+
+	myjson.SendJSON(w, http.StatusCreated, res)
 }
