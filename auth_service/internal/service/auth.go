@@ -4,8 +4,9 @@ import (
 	"articles/internal/repository"
 	"articles/pgk/validation"
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthDI struct {
@@ -19,10 +20,11 @@ func NewAuthService(repo repository.AuthRepository) *AuthDI {
 }
 
 type Service interface {
-	Register(email, username, passwordHash string) (int, error, string)
+	Register(email, username, password string) (int, error, string)
+	Login(email, password string) (int, error, string)
 }
 
-func (r *AuthDI) Register(email, username, password string) (int, error, string) {
+func (a *AuthDI) Register(email, username, password string) (int, error, string) {
 	if !validation.IsEmailValid(email) {
 		return http.StatusBadRequest, fmt.Errorf("Invalid email:"), "Некорректный email."
 	}
@@ -30,7 +32,7 @@ func (r *AuthDI) Register(email, username, password string) (int, error, string)
 		return http.StatusBadRequest, fmt.Errorf("Username is too short"), "Ошибка. Ваше имя пользователя меньше 4 символов"
 	}
 	if len(password) < 6 {
-		return http.StatusBadRequest, fmt.Errorf("Password is too short"), "Ошибка. Ваш пароль меньше 4 символов"
+		return http.StatusBadRequest, fmt.Errorf("Password is too short"), "Ошибка. Ваш пароль меньше 6 символов"
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -38,10 +40,25 @@ func (r *AuthDI) Register(email, username, password string) (int, error, string)
 		return http.StatusInternalServerError, fmt.Errorf("Passwrd encrypting error"), "Внутренняя ошибка сервера"
 	}
 
-	err = r.repo.RegisterUser(email, username, string(hashedPassword))
+	err = a.repo.RegisterUser(email, username, string(hashedPassword))
 	if err != nil {
 		return http.StatusConflict, err, "Данный Email уже зарегистрирован. Попробуйте авторизоваться в системе"
 	}
 
-	return http.StatusOK, fmt.Errorf(""), ""
+	return http.StatusOK, nil, ""
+}
+
+func (a *AuthDI) Login(email, password string) (int, error, string) {
+	u, err := a.repo.LoginUser(email)
+	if err != nil {
+		return http.StatusInternalServerError, err, "Ошибка сервера2"
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
+	fmt.Println("passwords", u.PasswordHash, "---", password)
+	if err != nil {
+		return http.StatusUnauthorized, fmt.Errorf("Wrong login or password"), "Неправильный логин или пароль"
+	}
+
+	return http.StatusOK, nil, ""
 }

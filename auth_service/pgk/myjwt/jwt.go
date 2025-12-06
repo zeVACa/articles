@@ -11,7 +11,7 @@ func GenerateJWT(email string) (string, error) {
 		"sub": email,
 	})
 
-	signedToken, err := rawToken.SignedString("1234")
+	signedToken, err := rawToken.SignedString([]byte("1234"))
 	if err != nil {
 		return "", err
 	}

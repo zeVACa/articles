@@ -3,8 +3,10 @@ package handlers
 import (
 	"articles/internal/service"
 	"articles/pgk/myjson"
+	"articles/pgk/myjwt"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -28,15 +30,12 @@ func (s *AuthHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	statusCode, err, userErrorMessage := (*s.service).Register(req.Email, req.Username, req.Password)
 	if err != nil {
+		log.Println(err)
 		myjson.SendError(w, err.Error(), userErrorMessage, statusCode)
 		return
 	}
 
-	res := RegisterResponse{
-		Success: true,
-	}
-
-	myjson.SendJSON(w, http.StatusCreated, res)
+	myjson.SendJSON(w, http.StatusCreated, RegisterResponse{Success: true})
 }
 
 func (s *AuthHandlerDI) LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +44,17 @@ func (s *AuthHandlerDI) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	//myjwt.GenerateJWT()
 
-	myjson.SendJSON(w, http.StatusOK, req)
+	statusCode, err, userErrorMessage := (*s.service).Login(req.Email, req.Password)
+	if err != nil {
+		myjson.SendError(w, err.Error(), userErrorMessage, statusCode)
+		return
+	}
 
-	fmt.Println(req)
+	token, err := myjwt.GenerateJWT(req.Email)
+	if err != nil {
+		myjson.SendError(w, err.Error(), "Ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+
+	myjson.SendJSON(w, http.StatusOK, LoginResponse{Token: token})
 }

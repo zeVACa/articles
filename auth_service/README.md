@@ -18,3 +18,5 @@ auth-service/
 └── README.md
 
 router -> handler -> service -> repository.
+
+в раннере нужно прописать в поле environment строчку "CONFIG_PATH=./config/local.yaml"

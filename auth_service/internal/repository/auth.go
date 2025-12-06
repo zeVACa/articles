@@ -4,6 +4,7 @@ import (
 	"articles/internal/models"
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v5"
 )
 
@@ -21,19 +22,30 @@ func NewAuthRepository(conn *pgx.Conn) *AuthRepositoryDI {
 }
 
 type AuthRepository interface {
-	RegisterUser(email, username, passwordHash string) error
+	RegisterUser(email, username, hashedPassword string) error
+	LoginUser(email string) (models.User, error)
 }
 
-func (r *AuthRepositoryDI) RegisterUser(email, username, passwordHash string) error {
-	var u models.User
-
-	err := r.conn.QueryRow(context.Background(),
-		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING id, email, username, password_hash, email_verified, created_at, updated_at", email, username, passwordHash).
-		Scan(&u.ID, &u.Email, &u.Username, &u.PasswordHash, &u.EmailVerified, &u.CreatedAt, &u.UpdatedAt)
+func (r *AuthRepositoryDI) RegisterUser(email, username, hashedPassword string) error {
+	_, err := r.conn.Exec(context.Background(),
+		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3)", email, username, hashedPassword)
 
 	if err != nil {
-		return fmt.Errorf("QueryRow failed: %v\n", err)
+		return fmt.Errorf("QueryRow failed: %s\n", err)
 	}
 
 	return nil
+}
+
+func (r *AuthRepositoryDI) LoginUser(email string) (models.User, error) {
+	var u models.User
+
+	err := r.conn.QueryRow(context.Background(),
+		"SELECT * FROM users WHERE email=$1", email).
+		Scan(&u.ID, &u.Email, &u.Username, &u.PasswordHash, &u.EmailVerified, &u.CreatedAt, &u.UpdatedAt)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return u, nil
 }
