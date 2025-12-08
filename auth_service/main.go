@@ -18,11 +18,6 @@ const (
 )
 
 func main() {
-	// TODO config
-	// TODO logger
-	// TODO init storage
-	// TODO init router
-	// TODO run server
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 
@@ -30,11 +25,7 @@ func main() {
 
 	log.Info("App started", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
-
-	//var pool pgxpool.Pool
-	//r := repository.NewAuthRepository(&pool)
-	//srvs := service.NewAuthService(r)
-	//h := handlers.RegisterUserHandlerDI{}
+	
 	db := storage.InitDatabase()
 	authService := service.NewAuthService(repository.NewAuthRepository(db))
 

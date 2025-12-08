@@ -3,11 +3,13 @@ package router
 import (
 	"articles/internal/config"
 	"articles/internal/handlers"
+	mymiddleware "articles/internal/middleware"
 	"articles/internal/service"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func ImplementRouter(s service.Service) {
@@ -19,6 +21,12 @@ func ImplementRouter(s service.Service) {
 
 	r.Post("/register", handler.RegisterUser)
 	r.Post("/login", handler.LoginUser)
+
+	r.Group(func(r chi.Router) {
+		r.Use(mymiddleware.AuthMiddleware)
+
+		r.Post("/test", handler.Test)
+	})
 
 	cfg := config.MustLoad()
 	srv := http.Server{

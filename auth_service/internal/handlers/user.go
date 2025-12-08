@@ -40,9 +40,10 @@ func (s *AuthHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 func (s *AuthHandlerDI) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
-	json.NewDecoder(r.Body).Decode(&req)
-
-	//myjwt.GenerateJWT()
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		myjson.SendError(w, err.Error(), "Неверный формат данных", http.StatusBadRequest)
+		return
+	}
 
 	statusCode, err, userErrorMessage := (*s.service).Login(req.Email, req.Password)
 	if err != nil {
@@ -57,4 +58,11 @@ func (s *AuthHandlerDI) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	myjson.SendJSON(w, http.StatusOK, LoginResponse{Token: token})
+}
+
+func (s *AuthHandlerDI) Test(w http.ResponseWriter, r *http.Request) {
+	type Ok struct {
+		Ok string `json:"ok"`
+	}
+	myjson.SendJSON(w, http.StatusOK, Ok{Ok: "hello"})
 }

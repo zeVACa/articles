@@ -8,11 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//type AuthRepository interface {
-//	RegisterUser() (models.User, error)
-//	LoginUser() (models.User, error)
-//}
-
 type AuthRepositoryDI struct {
 	conn *pgx.Conn
 }

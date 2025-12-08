@@ -51,13 +51,12 @@ func (a *AuthDI) Register(email, username, password string) (int, error, string)
 func (a *AuthDI) Login(email, password string) (int, error, string) {
 	u, err := a.repo.LoginUser(email)
 	if err != nil {
-		return http.StatusInternalServerError, err, "Ошибка сервера2"
+		return http.StatusInternalServerError, err, "Ошибка сервера"
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
-	fmt.Println("passwords", u.PasswordHash, "---", password)
 	if err != nil {
-		return http.StatusUnauthorized, fmt.Errorf("Wrong login or password"), "Неправильный логин или пароль"
+		return http.StatusUnauthorized, fmt.Errorf("wrong login or password"), "Неправильный логин или пароль"
 	}
 
 	return http.StatusOK, nil, ""
