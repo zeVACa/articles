@@ -2,7 +2,7 @@ package service
 
 import (
 	"articles/internal/repository"
-	"articles/pgk/validation"
+	"articles/pkg/validation"
 	"fmt"
 	"net/http"
 

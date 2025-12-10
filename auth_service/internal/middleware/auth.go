@@ -1,8 +1,8 @@
 package mymiddleware
 
 import (
-	"articles/pgk/myjson"
-	"articles/pgk/myjwt"
+	"articles/pkg/jsonPkg"
+	"articles/pkg/jwtPkg"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,9 +20,9 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		json.NewDecoder(r.Body).Decode(&body)
 		log.Println("Токен", body)
 
-		_, err := myjwt.ValidateToken(body.Token)
+		_, err := jwtPkg.ValidateToken(body.Token)
 		if err != nil {
-			myjson.SendError(w, err.Error(), "Невалидный токен", http.StatusUnauthorized)
+			jsonPkg.SendError(w, err.Error(), "Невалидный токен", http.StatusUnauthorized)
 			return
 		}
 

@@ -1,4 +1,4 @@
-package myjson
+package jsonPkg
 
 import (
 	"encoding/json"
