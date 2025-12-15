@@ -38,6 +38,6 @@ func ImplementRouter(s service.Service) {
 	}
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Printf("failed to start serverrrrrrrrr %v", err)
+		log.Printf("failed to start server: %v", err)
 	}
 }

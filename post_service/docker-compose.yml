@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: post_postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postdb
+    ports:
+      - "5433:5433"
+    command: -p 5433  # ← PostgreSQL слушает порт 5433 внутри контейнера
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5433" ]  # ← проверка на порту 5433
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
