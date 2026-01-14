@@ -3,7 +3,6 @@ package router
 import (
 	"articles/internal/config"
 	"articles/internal/handlers"
-	mymiddleware "articles/internal/middleware"
 	"articles/internal/service"
 	"log"
 	"net/http"
@@ -19,16 +18,8 @@ func ImplementRouter(s service.Service) {
 
 	handler := handlers.NewPostsHandler(s)
 
-	//r.Post("/posts", handler.RegisterUser)
 	r.Get("/posts", handler.GetAllPosts)
 	r.Post("/posts", handler.CreatePost)
-	//r.Post("/login", handler.LoginUser)
-
-	r.Group(func(r chi.Router) {
-		r.Use(mymiddleware.AuthMiddleware)
-
-		r.Post("/test", handler.Test)
-	})
 
 	cfg := config.MustLoad()
 	srv := http.Server{

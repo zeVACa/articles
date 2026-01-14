@@ -17,9 +17,34 @@ func NewPostsRepository(conn *pgx.Conn) *PostsRepositoryDI {
 }
 
 type PostsRepository interface {
-	//RegisterUser(email, username, hashedPassword string) error
-	//LoginUser(email string) (models.User, error)
+	GetAllPosts() ([]models.Post, error)
 	CreatePost(authorId int64, title, content string) (models.Post, error)
+}
+
+func (r *PostsRepositoryDI) GetAllPosts() ([]models.Post, error) {
+	var posts []models.Post
+
+	rows, err := r.conn.Query(context.Background(), "SELECT * from posts")
+	if err != nil {
+		return nil, fmt.Errorf("Query failed: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p models.Post
+
+		err = rows.Scan(&p.ID, &p.AuthorID, &p.Title, &p.Content, &p.CreatedAt, &p.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("Scan failed: %w", err)
+		}
+
+		posts = append(posts, p)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Rows iteration failed: %w", err)
+	}
+
+	return posts, nil
 }
 
 func (r *PostsRepositoryDI) CreatePost(authorId int64, title, content string) (models.Post, error) {

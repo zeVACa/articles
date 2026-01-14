@@ -17,9 +17,17 @@ func NewPostsService(repo repository.PostsRepository) *PostsDI {
 }
 
 type Service interface {
-	//Register(email, username, password string) (int, error, string)
-	//Login(email, password string) (int, error, string)
+	GetAllPosts() ([]models.Post, int, error, string)
 	CreatePost(authorId int64, title, content string) (models.Post, int, error, string)
+}
+
+func (p *PostsDI) GetAllPosts() ([]models.Post, int, error, string) {
+	posts, err := p.repo.GetAllPosts()
+	if err != nil {
+		return []models.Post{}, http.StatusInternalServerError, err, "Ошибка сервера"
+	}
+
+	return posts, 0, nil, ""
 }
 
 func (p *PostsDI) CreatePost(authorId int64, title, content string) (models.Post, int, error, string) {
@@ -29,13 +37,6 @@ func (p *PostsDI) CreatePost(authorId int64, title, content string) (models.Post
 	}
 
 	return post, http.StatusOK, nil, ""
-
-	//err = bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
-	//if err != nil {
-	//	return http.StatusUnauthorized, fmt.Errorf("wrong login or password"), "Неправильный логин или пароль"
-	//}
-	//
-	//return http.StatusOK, nil, ""
 }
 
 //func (a *PostsDI) Register(email, username, password string) (int, error, string) {
