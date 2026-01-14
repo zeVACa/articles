@@ -18,3 +18,7 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Token string `json:"token"`
 }
+
+type UserVerifyResponse struct {
+	IsUserVerified bool `json:"is_user_verified"`
+}

@@ -25,7 +25,7 @@ func ImplementRouter(s service.Service) {
 	r.Group(func(r chi.Router) {
 		r.Use(mymiddleware.AuthMiddleware)
 
-		r.Post("/test", handler.Test)
+		r.Post("/verify", handler.Verify)
 	})
 
 	cfg := config.MustLoad()

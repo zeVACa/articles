@@ -60,9 +60,6 @@ func (s *AuthHandlerDI) LoginUser(w http.ResponseWriter, r *http.Request) {
 	jsonPkg.SendJSON(w, http.StatusOK, LoginResponse{Token: token})
 }
 
-func (s *AuthHandlerDI) Test(w http.ResponseWriter, r *http.Request) {
-	type Ok struct {
-		Ok string `json:"ok"`
-	}
-	jsonPkg.SendJSON(w, http.StatusOK, Ok{Ok: "hello"})
+func (s *AuthHandlerDI) Verify(w http.ResponseWriter, r *http.Request) {
+	jsonPkg.SendJSON(w, http.StatusOK, UserVerifyResponse{IsUserVerified: true})
 }
