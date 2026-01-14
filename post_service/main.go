@@ -25,11 +25,11 @@ func main() {
 
 	log.Info("App started", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
-	
-	db := storage.InitDatabase()
-	authService := service.NewAuthService(repository.NewAuthRepository(db))
 
-	router.ImplementRouter(authService)
+	db := storage.InitDatabase()
+	postsService := service.NewPostsService(repository.NewPostsRepository(db))
+
+	router.ImplementRouter(postsService)
 
 }
 

@@ -9,7 +9,7 @@ import (
 )
 
 func InitDatabase() (db *pgx.Conn) {
-	conn, err := pgx.Connect(context.Background(), "postgres://postgres:postgres@localhost:5433/postdb?sslmode=disable")
+	conn, err := pgx.Connect(context.Background(), "postgres://postgres:postgres@localhost:5433/postgres?sslmode=disable")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)

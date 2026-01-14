@@ -17,10 +17,12 @@ func ImplementRouter(s service.Service) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	handler := handlers.NewAuthHandler(s)
+	handler := handlers.NewPostsHandler(s)
 
-	r.Post("/register", handler.RegisterUser)
-	r.Post("/login", handler.LoginUser)
+	//r.Post("/posts", handler.RegisterUser)
+	r.Get("/posts", handler.GetAllPosts)
+	r.Post("/posts", handler.CreatePost)
+	//r.Post("/login", handler.LoginUser)
 
 	r.Group(func(r chi.Router) {
 		r.Use(mymiddleware.AuthMiddleware)
