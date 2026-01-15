@@ -8,10 +8,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = []byte("1234")
+var secretKey = []byte("a-string-secret-at-least-256-bits-long")
 
 type Claims struct {
-	Email string `json:"user_email"`
+	Email  string `json:"user_email"`
+	UserID int64  `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
@@ -38,13 +39,12 @@ func ValidateToken(tokenString string) (*Claims, error) {
 		}
 		return secretKey, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil // ✅ Токен валиден
+		return claims, nil
 	}
 
 	return nil, errors.New("invalid token")

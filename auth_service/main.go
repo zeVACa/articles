@@ -2,13 +2,21 @@ package main
 
 import (
 	"articles/internal/config"
+	grpcHandler "articles/internal/handlers/grpc_handlers"
 	"articles/internal/repository"
 	"articles/internal/router"
 	"articles/internal/service"
+	"articles/pkg/grpc/pb"
 	"articles/storage"
 	"fmt"
+	"log"
 	"log/slog"
+	"net"
 	"os"
+	"os/signal"
+	"syscall"
+
+	"google.golang.org/grpc"
 )
 
 const (
@@ -21,16 +29,44 @@ func main() {
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 
-	log := setupLogger(cfg.Env)
+	logger := setupLogger(cfg.Env)
 
-	log.Info("App started", slog.String("env", cfg.Env))
-	log.Debug("debug messages are enabled")
-	
+	logger.Info("App started", slog.String("env", cfg.Env))
+	logger.Debug("debug messages are enabled")
+
 	db := storage.InitDatabase()
 	authService := service.NewAuthService(repository.NewAuthRepository(db))
 
-	router.ImplementRouter(authService)
+	go func() {
+		logger.Info("Starting HTTP server", slog.String("port", ":8080"))
+		router.ImplementRouter(authService)
+	}()
 
+	go func() {
+		log.Println("Starting gRPC server...")
+
+		lis, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatalf("Failed to listen on :50051: %v", err)
+		}
+
+		grpcServer := grpc.NewServer()
+
+		authHandler := grpcHandler.NewAuthGRPCHandler()
+		pb.RegisterAuthServiceServer(grpcServer, authHandler)
+
+		log.Println("gRPC server listening on :50051")
+
+		if err = grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve gRPC: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Info("Shutting down servers...")
 }
 
 func setupLogger(env string) *slog.Logger {

@@ -1,26 +1,28 @@
-package handlers
+package rest_handlers
 
 import (
-	//"articles/internal/models"
 	"articles/internal/service"
+	authClient "articles/pkg/grpc/auth_client"
 	"articles/pkg/jsonPkg"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
-
-	//"time"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type PostsHandlerDI struct {
-	service service.Service
+	service        service.Service
+	authGrpcClient *authClient.AuthClient
 }
 
-func NewPostsHandler(service service.Service) *PostsHandlerDI {
+func NewPostsHandler(service service.Service, authGrpcClient *authClient.AuthClient) *PostsHandlerDI {
 	return &PostsHandlerDI{
-		service: service,
+		service:        service,
+		authGrpcClient: authGrpcClient,
 	}
 }
 
@@ -59,7 +61,33 @@ func (p *PostsHandlerDI) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, statusCode, err, errMessage := p.service.CreatePost(req.AuthorId, req.Title, req.Content)
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		log.Println("Missing Authorization header")
+		jsonPkg.SendError(w, "Authorization header is required", "Требуется авторизация", http.StatusUnauthorized)
+		return
+	}
+
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if token == authHeader {
+		log.Println("Invalid Authorization format")
+		jsonPkg.SendError(w, "Invalid Authorization format", "Неверный формат токена", http.StatusUnauthorized)
+		return
+	}
+
+	isTokenVerified, userID, err := p.authGrpcClient.VerifyToken(token)
+	if err != nil {
+		log.Printf("gRPC error: %v", err)
+		jsonPkg.SendError(w, err.Error(), "Сервис авторизации недоступен", http.StatusServiceUnavailable)
+		return
+	}
+
+	if !isTokenVerified {
+		jsonPkg.SendError(w, "Token is invalid", "Невалидный токен", http.StatusUnauthorized)
+		return
+	}
+
+	post, statusCode, err, errMessage := p.service.CreatePost(userID, req.Title, req.Content)
 	if err != nil {
 		jsonPkg.SendError(w, errMessage, "Ошибка сервера", statusCode)
 		fmt.Println(err)

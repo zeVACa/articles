@@ -2,7 +2,7 @@ package router
 
 import (
 	"articles/internal/config"
-	"articles/internal/handlers"
+	"articles/internal/handlers/rest_handlers"
 	mymiddleware "articles/internal/middleware"
 	"articles/internal/service"
 	"log"
@@ -17,7 +17,7 @@ func ImplementRouter(s service.Service) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	handler := handlers.NewAuthHandler(s)
+	handler := rest_handlers.NewAuthHandler(s)
 
 	r.Post("/register", handler.RegisterUser)
 	r.Post("/login", handler.LoginUser)
