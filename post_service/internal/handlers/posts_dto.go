@@ -8,6 +8,10 @@ type GetAllPostsResponse struct {
 	Posts []models.Post `json:"posts"`
 }
 
+type GetPostByIdResponse struct {
+	Post models.Post `json:"post"`
+}
+
 type CreatePostRequest struct {
 	AuthorId int64  `json:"author_id"`
 	Title    string `json:"title"`

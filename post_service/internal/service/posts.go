@@ -18,6 +18,7 @@ func NewPostsService(repo repository.PostsRepository) *PostsDI {
 
 type Service interface {
 	GetAllPosts() ([]models.Post, int, error, string)
+	GetPostById(id int64) (models.Post, int, error, string)
 	CreatePost(authorId int64, title, content string) (models.Post, int, error, string)
 }
 
@@ -28,6 +29,15 @@ func (p *PostsDI) GetAllPosts() ([]models.Post, int, error, string) {
 	}
 
 	return posts, 0, nil, ""
+}
+
+func (p *PostsDI) GetPostById(id int64) (models.Post, int, error, string) {
+	post, err := p.repo.GetPostById(id)
+	if err != nil {
+		return models.Post{}, http.StatusInternalServerError, err, "Ошибка сервера"
+	}
+
+	return post, 0, nil, ""
 }
 
 func (p *PostsDI) CreatePost(authorId int64, title, content string) (models.Post, int, error, string) {

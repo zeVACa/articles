@@ -7,7 +7,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
 	//"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type PostsHandlerDI struct {
@@ -27,6 +31,24 @@ func (p *PostsHandlerDI) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonPkg.SendJSON(w, http.StatusOK, GetAllPostsResponse{Posts: posts})
+}
+
+func (p *PostsHandlerDI) GetPostById(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	post, statusCode, err, errMessage := p.service.GetPostById(id)
+	if err != nil {
+		jsonPkg.SendError(w, errMessage, "Ошибка сервера", statusCode)
+		return
+	}
+
+	jsonPkg.SendJSON(w, http.StatusOK, GetPostByIdResponse{Post: post})
 }
 
 func (p *PostsHandlerDI) CreatePost(w http.ResponseWriter, r *http.Request) {

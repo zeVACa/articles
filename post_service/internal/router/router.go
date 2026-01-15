@@ -19,6 +19,7 @@ func ImplementRouter(s service.Service) {
 	handler := handlers.NewPostsHandler(s)
 
 	r.Get("/posts", handler.GetAllPosts)
+	r.Get("/posts/{id}", handler.GetPostById)
 	r.Post("/posts", handler.CreatePost)
 
 	cfg := config.MustLoad()
