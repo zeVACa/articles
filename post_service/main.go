@@ -5,6 +5,7 @@ import (
 	"articles/internal/repository"
 	"articles/internal/router"
 	"articles/internal/service"
+	authClient "articles/pkg/grpc/auth_client"
 	"articles/storage"
 	"fmt"
 	"log/slog"
@@ -29,7 +30,14 @@ func main() {
 	db := storage.InitDatabase()
 	postsService := service.NewPostsService(repository.NewPostsRepository(db))
 
-	router.ImplementRouter(postsService)
+	authGrpcClient, err := authClient.NewAuthClient("localhost:50051") // ← ИСПРАВЛЕНО!
+	if err != nil {
+		log.Error("Failed to connect to auth service", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	defer authGrpcClient.Close()
+
+	router.ImplementRouter(postsService, authGrpcClient)
 
 }
 

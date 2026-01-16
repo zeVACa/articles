@@ -4,6 +4,7 @@ import (
 	"articles/internal/config"
 	"articles/internal/handlers"
 	"articles/internal/service"
+	"articles/pkg/grpc/auth_client"
 	"log"
 	"net/http"
 
@@ -11,12 +12,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func ImplementRouter(s service.Service) {
+func ImplementRouter(s service.Service, authGrpcClient *auth_client.AuthClient) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	handler := handlers.NewPostsHandler(s)
+	handler := handlers.NewPostsHandler(s, authGrpcClient)
 
 	r.Get("/posts", handler.GetAllPosts)
 	r.Get("/posts/{id}", handler.GetPostById)

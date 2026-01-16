@@ -1,4 +1,4 @@
-package rest_handlers
+package handlers
 
 import (
 	"articles/internal/service"

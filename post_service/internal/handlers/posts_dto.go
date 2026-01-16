@@ -1,4 +1,4 @@
-package rest_handlers
+package handlers
 
 import (
 	"articles/internal/models"
@@ -13,9 +13,8 @@ type GetPostByIdResponse struct {
 }
 
 type CreatePostRequest struct {
-	AuthorId int64  `json:"author_id"`
-	Title    string `json:"title"`
-	Content  string `json:"content"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 type CreatePostResponse struct {
