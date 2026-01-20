@@ -3,6 +3,7 @@ package main
 import (
 	"articles/internal/config"
 	grpcHandler "articles/internal/handlers/grpc_handlers"
+	"articles/internal/kafka"
 	"articles/internal/repository"
 	"articles/internal/router"
 	"articles/internal/service"
@@ -34,12 +35,22 @@ func main() {
 	logger.Info("App started", slog.String("env", cfg.Env))
 	logger.Debug("debug messages are enabled")
 
+	// Инициализация Kafka Producer
+	kafkaBrokers := []string{"localhost:9092"} // Измените на ваш адрес Kafka
+	kafkaProducer, err := kafka.NewProducer(kafkaBrokers)
+	if err != nil {
+		logger.Error("Failed to create Kafka producer", slog.String("error", err.Error()))
+		log.Fatalf("Failed to create Kafka producer: %v", err)
+	}
+	defer kafkaProducer.Close()
+	logger.Info("Kafka producer initialized successfully")
+
 	db := storage.InitDatabase()
 	authService := service.NewAuthService(repository.NewAuthRepository(db))
 
 	go func() {
 		logger.Info("Starting HTTP server", slog.String("port", ":8080"))
-		router.ImplementRouter(authService)
+		router.ImplementRouter(authService, kafkaProducer)
 	}()
 
 	go func() {

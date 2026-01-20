@@ -1,6 +1,7 @@
 package rest_handlers
 
 import (
+	"articles/internal/kafka"
 	"articles/internal/service"
 	"articles/pkg/jsonPkg"
 	"articles/pkg/jwtPkg"
@@ -11,12 +12,14 @@ import (
 )
 
 type AuthHandlerDI struct {
-	service service.Service
+	service       service.Service
+	kafkaProducer *kafka.Producer
 }
 
-func NewAuthHandler(service service.Service) *AuthHandlerDI {
+func NewAuthHandler(service service.Service, kafkaProducer *kafka.Producer) *AuthHandlerDI {
 	return &AuthHandlerDI{
-		service: service,
+		service:       service,
+		kafkaProducer: kafkaProducer,
 	}
 }
 
@@ -28,11 +31,16 @@ func (s *AuthHandlerDI) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusCode, err, userErrorMessage := s.service.Register(req.Email, req.Username, req.Password)
+	userID, statusCode, err, userErrorMessage := s.service.Register(req.Email, req.Username, req.Password)
 	if err != nil {
 		log.Println(err)
 		jsonPkg.SendError(w, err.Error(), userErrorMessage, statusCode)
 		return
+	}
+	
+	err = s.kafkaProducer.SendUserRegisteredEvent(userID, req.Email, req.Username)
+	if err != nil {
+		log.Printf("Failed to send Kafka event: %v", err)
 	}
 
 	jsonPkg.SendJSON(w, http.StatusCreated, RegisterResponse{Success: true})

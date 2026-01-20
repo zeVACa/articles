@@ -17,19 +17,21 @@ func NewAuthRepository(conn *pgx.Conn) *AuthRepositoryDI {
 }
 
 type AuthRepository interface {
-	RegisterUser(email, username, hashedPassword string) error
+	RegisterUser(email, username, hashedPassword string) (int64, error)
 	LoginUser(email string) (models.User, error)
 }
 
-func (r *AuthRepositoryDI) RegisterUser(email, username, hashedPassword string) error {
-	_, err := r.conn.Exec(context.Background(),
-		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3)", email, username, hashedPassword)
+func (r *AuthRepositoryDI) RegisterUser(email, username, hashedPassword string) (int64, error) {
+	var userID int64
+	err := r.conn.QueryRow(context.Background(),
+		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING id",
+		email, username, hashedPassword).Scan(&userID)
 
 	if err != nil {
-		return fmt.Errorf("QueryRow failed: %s\n", err)
+		return 0, fmt.Errorf("QueryRow failed: %s\n", err)
 	}
 
-	return nil
+	return userID, nil
 }
 
 func (r *AuthRepositoryDI) LoginUser(email string) (models.User, error) {

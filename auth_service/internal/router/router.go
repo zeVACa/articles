@@ -3,6 +3,7 @@ package router
 import (
 	"articles/internal/config"
 	"articles/internal/handlers/rest_handlers"
+	"articles/internal/kafka"
 	mymiddleware "articles/internal/middleware"
 	"articles/internal/service"
 	"log"
@@ -12,12 +13,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func ImplementRouter(s service.Service) {
+func ImplementRouter(s service.Service, kafkaProducer *kafka.Producer) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	handler := rest_handlers.NewAuthHandler(s)
+	handler := rest_handlers.NewAuthHandler(s, kafkaProducer)
 
 	r.Post("/register", handler.RegisterUser)
 	r.Post("/login", handler.LoginUser)
