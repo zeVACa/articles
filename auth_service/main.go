@@ -35,8 +35,7 @@ func main() {
 	logger.Info("App started", slog.String("env", cfg.Env))
 	logger.Debug("debug messages are enabled")
 
-	// Инициализация Kafka Producer
-	kafkaBrokers := []string{"localhost:9092"} // Измените на ваш адрес Kafka
+	kafkaBrokers := []string{"localhost:9092"}
 	kafkaProducer, err := kafka.NewProducer(kafkaBrokers)
 	if err != nil {
 		logger.Error("Failed to create Kafka producer", slog.String("error", err.Error()))

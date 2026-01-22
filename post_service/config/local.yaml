@@ -5,3 +5,8 @@ http_server:
   idle_timeout: 60s
 
 database_url: "postgres://postgres:postgres@localhost:5433/postdb?sslmode=disable"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0  
